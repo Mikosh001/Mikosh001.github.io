@@ -439,8 +439,12 @@
       gap: 10px;
       border: 1px solid var(--line);
       border-radius: 15px;
+      color: inherit;
+      background: transparent;
+      font: inherit;
       font-weight: 750;
       text-decoration: none;
+      cursor: pointer;
       transition: transform .25s var(--ease), border-color .25s ease, background .25s ease, color .25s ease;
     }
     .button:hover { transform: translateY(-4px); border-color: rgba(198,255,61,.45); }
@@ -1008,6 +1012,187 @@
     }
     .contact-link:hover { transform: translateY(-4px); background: #fff; }
 
+    body.resume-open { overflow: hidden; }
+    .resume-modal {
+      width: 100vw;
+      max-width: none;
+      height: 100dvh;
+      max-height: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      color: var(--ink);
+      background: transparent;
+    }
+    .resume-modal::backdrop {
+      background: rgba(3,5,4,.78);
+      backdrop-filter: blur(14px) saturate(.8);
+      animation: resume-backdrop-in .55s ease both;
+    }
+    .resume-modal[open] { display: grid; place-items: center; animation: resume-dialog-in .72s var(--ease) both; }
+    .resume-modal.is-closing { animation: resume-dialog-out .42s var(--ease) both; }
+    .resume-modal.is-closing::backdrop { animation: resume-backdrop-out .42s ease both; }
+    @keyframes resume-dialog-in {
+      from { opacity: 0; transform: perspective(1200px) translateY(8vh) rotateX(9deg) scale(.9); clip-path: inset(48% 46% round 38px); }
+      58% { opacity: 1; clip-path: inset(0 0 round 28px); }
+      to { transform: perspective(1200px) translateY(0) rotateX(0) scale(1); clip-path: inset(0 0 round 0); }
+    }
+    @keyframes resume-dialog-out { to { opacity: 0; transform: perspective(1200px) translateY(6vh) rotateX(-6deg) scale(.94); clip-path: inset(45% 45% round 32px); } }
+    @keyframes resume-backdrop-in { from { opacity: 0; backdrop-filter: blur(0); } }
+    @keyframes resume-backdrop-out { to { opacity: 0; backdrop-filter: blur(0); } }
+    .resume-shell {
+      position: relative;
+      width: min(1180px, calc(100vw - 34px));
+      height: min(900px, calc(100dvh - 34px));
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(198,255,61,.45) transparent;
+      border: 1px solid rgba(198,255,61,.24);
+      border-radius: 28px;
+      background:
+        linear-gradient(rgba(255,255,255,.027) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.027) 1px, transparent 1px),
+        radial-gradient(700px circle at 78% 0, rgba(198,255,61,.095), transparent 48%),
+        #0b0e0c;
+      background-size: 42px 42px, 42px 42px, auto, auto;
+      box-shadow: 0 40px 120px rgba(0,0,0,.72), inset 0 1px rgba(255,255,255,.06);
+    }
+    .resume-shell::after {
+      content: "";
+      position: fixed;
+      z-index: 8;
+      left: 50%;
+      top: calc(50% - min(450px, calc(50dvh - 17px)));
+      width: min(1180px, calc(100vw - 34px));
+      height: 2px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, var(--lime), var(--cyan), transparent);
+      filter: drop-shadow(0 0 9px rgba(198,255,61,.72));
+      transform: translateX(-50%);
+      animation: resume-scan 3.8s ease-in-out infinite;
+    }
+    @keyframes resume-scan { 0%,100% { opacity: .12; transform: translate(-50%, 5px) scaleX(.12); } 48% { opacity: .8; transform: translate(-50%, calc(min(900px, calc(100dvh - 34px)) - 7px)) scaleX(1); } 58% { opacity: 0; } }
+    .resume-topbar {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      min-height: 68px;
+      padding: 10px 14px 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(8,10,9,.86);
+      backdrop-filter: blur(18px);
+    }
+    .resume-file { display: flex; align-items: center; gap: 10px; color: #cbd0c8; }
+    .resume-file::before { content: ""; width: 8px; aspect-ratio: 1; border-radius: 50%; background: var(--lime); box-shadow: 0 0 16px var(--lime); }
+    .resume-controls { display: flex; align-items: center; gap: 9px; }
+    .resume-lang-switch { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025); }
+    .resume-lang-btn {
+      width: 38px;
+      height: 34px;
+      border: 0;
+      border-radius: 9px;
+      color: var(--dim);
+      background: transparent;
+      font: 750 .68rem/1 "Cascadia Code", monospace;
+      cursor: pointer;
+      transition: transform .25s var(--ease), color .25s ease, background .25s ease, box-shadow .25s ease;
+    }
+    .resume-lang-btn:hover { color: var(--ink); transform: translateY(-2px); }
+    .resume-lang-btn.active { color: #080a09; background: var(--lime); box-shadow: 0 0 18px rgba(198,255,61,.2); }
+    .resume-lang-btn.is-selecting { animation: language-button-pop .65s var(--ease); }
+    .resume-close {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.035);
+      font: 500 1.25rem/1 monospace;
+      cursor: pointer;
+      transition: transform .32s var(--ease), color .25s ease, border-color .25s ease, background .25s ease;
+    }
+    .resume-close:hover { transform: rotate(90deg) scale(1.08); color: #080a09; border-color: var(--lime); background: var(--lime); }
+    .resume-content { padding: clamp(28px, 5vw, 70px); transform-origin: 50% 10%; }
+    .resume-content.is-translating { animation: resume-language-swap .68s var(--ease) both; }
+    @keyframes resume-language-swap {
+      0% { opacity: 1; transform: perspective(900px) rotateY(0); filter: blur(0); }
+      45% { opacity: 0; transform: perspective(900px) rotateY(7deg) translateX(-28px); filter: blur(8px); }
+      55% { opacity: 0; transform: perspective(900px) rotateY(-7deg) translateX(28px); filter: blur(8px); }
+      100% { opacity: 1; transform: perspective(900px) rotateY(0); filter: blur(0); }
+    }
+    .resume-hero { display: grid; grid-template-columns: 1.35fr .65fr; gap: 36px; align-items: end; margin-bottom: 38px; }
+    .resume-kicker { margin: 0 0 12px; color: var(--lime); }
+    .resume-hero h2 { max-width: 760px; font-size: clamp(3.2rem, 8vw, 7.5rem); }
+    .resume-role { margin: 18px 0 0; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.35rem); }
+    .resume-availability { justify-self: end; min-width: 240px; padding: 18px; border: 1px solid rgba(198,255,61,.24); border-radius: 18px; background: rgba(198,255,61,.045); }
+    .resume-availability strong { display: block; margin-bottom: 8px; color: var(--lime); font: 750 .78rem/1.3 "Cascadia Code", monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .resume-availability span { color: #c9cec6; }
+    .resume-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+    .resume-card {
+      position: relative;
+      grid-column: span 6;
+      padding: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.025);
+      transition: transform .35s var(--ease), border-color .3s ease, background .3s ease, box-shadow .3s ease;
+    }
+    .resume-card.wide { grid-column: 1 / -1; }
+    .resume-card::before { content: ""; position: absolute; inset: 0; opacity: 0; pointer-events: none; background: radial-gradient(360px circle at 90% 10%, rgba(198,255,61,.12), transparent 55%); transition: opacity .35s ease; }
+    .resume-card:hover { transform: translateY(-5px); border-color: rgba(198,255,61,.36); background: rgba(198,255,61,.035); box-shadow: 0 22px 52px rgba(0,0,0,.26); }
+    .resume-card:hover::before { opacity: 1; }
+    .resume-card > * { position: relative; z-index: 1; }
+    .resume-card-label { margin: 0 0 18px; color: var(--lime); }
+    .resume-summary { margin: 0; max-width: 980px; color: #d5dad2; font-size: clamp(1.2rem, 2.5vw, 1.7rem); line-height: 1.45; letter-spacing: -.02em; }
+    .resume-card h3 { margin: 0 0 10px; font-size: 1.35rem; }
+    .resume-card p { margin: 0; color: var(--muted); }
+    .resume-card p + p { margin-top: 10px; }
+    .resume-timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .resume-event { position: relative; min-height: 190px; padding: 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(0,0,0,.18); transition: transform .3s var(--ease), border-color .3s ease; }
+    .resume-event:hover { transform: translateY(-5px) rotate(-.4deg); border-color: rgba(168,139,255,.45); }
+    .resume-event time { display: block; margin-bottom: 28px; color: var(--violet); font: 700 .7rem/1.3 "Cascadia Code", monospace; }
+    .resume-event h3 { font-size: 1.05rem; }
+    .resume-event p { font-size: .9rem; }
+    .resume-builds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .resume-build { min-height: 215px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--line); border-radius: 16px; color: inherit; background: rgba(0,0,0,.16); text-decoration: none; transition: transform .3s var(--ease), border-color .3s ease, background .3s ease; }
+    .resume-build:hover { transform: translateY(-6px); border-color: rgba(198,255,61,.4); background: rgba(198,255,61,.045); }
+    .resume-build .mono { color: var(--dim); }
+    .resume-build strong { display: block; margin-bottom: 8px; font-size: 1.2rem; }
+    .resume-build p { font-size: .9rem; }
+    .resume-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
+    .resume-tag { padding: 7px 9px; border: 1px solid var(--line); border-radius: 999px; color: #bcc1b9; background: rgba(255,255,255,.02); font: .68rem/1 "Cascadia Code", monospace; }
+    .resume-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+    .resume-action { position: relative; min-height: 48px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 13px; color: var(--ink); background: rgba(255,255,255,.035); font-weight: 750; text-decoration: none; transition: transform .28s var(--ease), border-color .28s ease, color .28s ease, background .28s ease; }
+    .resume-action.primary { color: #080a09; border-color: var(--lime); background: var(--lime); }
+    .resume-action:hover { transform: translateY(-4px); border-color: var(--lime); }
+    .resume-action.primary:hover { box-shadow: 0 12px 28px rgba(198,255,61,.18); }
+
+    body.is-background .eyebrow .signal,
+    body.is-background .terminal::after,
+    body.is-background .hack-badge,
+    body.is-background .hack-badge::before,
+    body.is-background .process-track::before,
+    body.is-background .resume-shell::after { animation-play-state: paused !important; }
+    section.motion-paused .eyebrow .signal,
+    section.motion-paused .terminal::after,
+    section.motion-paused .hack-badge,
+    section.motion-paused .hack-badge::before,
+    section.motion-paused .process-track::before { animation-play-state: paused !important; }
+    body.performance-lite::after { display: none; }
+    body.performance-lite .terminal,
+    body.performance-lite .nav,
+    body.performance-lite .resume-topbar { backdrop-filter: blur(10px); }
+    body.performance-lite .card::before { filter: blur(12px); }
+
     footer { padding: 28px 0 40px; color: var(--dim); }
     .footer-row { display: flex; justify-content: space-between; gap: 20px; }
 
@@ -1038,12 +1223,19 @@
       .bio-card { grid-row: auto; min-height: 390px; }
       .projects-grid { grid-template-columns: 1fr; }
       .project, .project:nth-child(n) { grid-column: 1; min-height: 320px; }
+      .project.reveal:nth-child(even) { transform: translateY(42px) scale(.975) rotate(.4deg); }
       .process-track { grid-template-columns: 1fr; }
       .process-track::before { top: 0; bottom: 0; left: 0; right: auto; width: 2px; height: auto; transform-origin: top; animation-name: process-flow-mobile; }
       @keyframes process-flow-mobile { 0%,100% { transform: scaleY(.05); opacity: .25; } 50% { transform: scaleY(1); opacity: .9; } }
       .step { min-height: auto; }
+      .step.reveal, .step.reveal:nth-child(2), .step.reveal:nth-child(3) { transform: perspective(900px) translateY(72px) rotateX(9deg) scale(.95); transform-origin: center top; }
       .step h3 { margin-top: 38px; }
       .contact-bottom { align-items: start; flex-direction: column; }
+      .resume-hero { grid-template-columns: 1fr; align-items: start; }
+      .resume-availability { justify-self: start; }
+      .resume-card { grid-column: 1 / -1; }
+      .resume-timeline { grid-template-columns: repeat(2, 1fr); }
+      .resume-builds { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 560px) {
@@ -1069,6 +1261,14 @@
       .footer-row { flex-direction: column; }
       .repo-cta { align-items: flex-start; flex-direction: column; }
       .repo-visual { align-self: flex-end; }
+      .resume-shell { width: calc(100vw - 16px); height: calc(100dvh - 16px); border-radius: 20px; }
+      .resume-shell::after { top: 8px; width: calc(100vw - 16px); }
+      .resume-topbar { min-height: 62px; padding: 8px 9px 8px 14px; }
+      .resume-file { font-size: .72rem; }
+      .resume-content { padding: 26px 18px 44px; }
+      .resume-hero h2 { font-size: clamp(3rem, 15vw, 5rem); }
+      .resume-timeline { grid-template-columns: 1fr; }
+      .resume-event { min-height: 165px; }
     }
 
     @media (max-width: 420px) {
@@ -1077,13 +1277,15 @@
       .nav-cta span { font-size: .92rem; }
       .mono { letter-spacing: .055em; }
       .section-copy, .quote, .step p, .contact-bottom p { overflow-wrap: anywhere; }
+      .resume-file span { display: none; }
+      .resume-lang-btn { width: 32px; }
     }
 
     @media (hover: none), (pointer: coarse) {
       .cursor-dot, .cursor-ring { display: none; }
       .card.reveal.in.scroll-active { transform: perspective(900px) translateY(-5px) rotateX(-1.5deg) scale(1.008); }
-      .project.reveal.in.scroll-active { transform: perspective(900px) translateY(-5px) scale(1.008); }
-      .step.reveal.in.scroll-active { transform: perspective(900px) translateY(-5px) rotateX(-1.5deg) scale(1.008); }
+      .project.reveal.in.scroll-active { transform: perspective(900px) translateY(-5px); }
+      .step.reveal.in.scroll-active { transform: perspective(900px) translateY(-5px) rotateX(-1.5deg); }
     }
 
   </style>
@@ -1132,6 +1334,7 @@
           <div class="hero-actions">
             <a class="button primary magnetic" href="#projects"><span data-i18n="viewProjects">Жобаларды көру</span> <span class="arrow" aria-hidden="true">↘</span></a>
             <a class="button ghost magnetic" href="#about"><span data-i18n="aboutButton">Мен туралы</span> <span class="arrow" aria-hidden="true">↓</span></a>
+            <button class="button ghost magnetic resume-trigger" type="button"><span data-i18n="resumeButton">Resume</span> <span class="arrow" aria-hidden="true">▤</span></button>
           </div>
         </div>
 
@@ -1190,7 +1393,7 @@
         <div class="about-grid">
           <article class="card bio-card reveal">
             <p class="card-label mono" data-i18n="background">Background</p>
-            <p class="quote" data-i18n-html="bio">Ақтауда туып-өстім, қазір Астанада <span>Astana IT University</span>-де Software Engineering мамандығының 2-курс студентімін.</p>
+            <p class="quote" data-i18n-html="bio">Ойыма келген нәрсені <span>build</span> жасауға тырысамын. Адамдар шынайы қолдана алатын modern, useful әрі trust-worthy өнімдер жасағанды ұнатамын.</p>
             <div class="card-bottom">
               <div class="city-line"><span data-i18n="aktau">Ақтау</span><span class="route">⟶</span><span data-i18n="astana">Астана</span></div>
               <span class="mono card-label">43.65°N → 51.17°N</span>
@@ -1221,30 +1424,40 @@
         </div>
 
         <div class="projects-grid">
+          <a class="project reveal tilt" href="https://github.com/BAITC-Hacks/hack-316738af-bek" target="_blank" rel="noreferrer">
+            <div class="project-top"><span class="project-index mono">01 / AI Agent</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-body"><h3>Qurylym AI</h3><p data-i18n="project1">Ұйымдық құрылым мен функцияларды салыстыратын, дәлел көрсетіп, нәтижені HTML/CSV форматына экспорттайтын AI агенті.</p><div class="tags"><span class="tag">React</span><span class="tag">FastAPI</span><span class="tag">OpenAI API</span></div></div>
+          </a>
+
           <a class="project reveal tilt" href="https://github.com/Mikosh001/tolqyn-ai-BluePulse-" target="_blank" rel="noreferrer">
-            <div class="project-top"><span class="project-index mono">01 / Repository</span><span class="project-arrow" aria-hidden="true">↗</span></div>
-            <div class="project-body"><h3>TOLQYN AI</h3><p data-i18n="project1">Каспийдегі мұнай мен қалқымалы объектілердің дрейфін болжайтын BluePulse командасының толық MVP-і.</p><div class="tags"><span class="tag">React</span><span class="tag">FastAPI</span><span class="tag">OpenCV</span></div></div>
+            <div class="project-top"><span class="project-index mono">02 / Hackathon</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-body"><h3>TOLQYN AI</h3><p data-i18n="project2">Каспийдегі мұнай мен қалқымалы объектілердің дрейфін болжайтын BluePulse командасының толық MVP-і.</p><div class="tags"><span class="tag">React</span><span class="tag">FastAPI</span><span class="tag">OpenCV</span></div></div>
           </a>
 
           <a class="project reveal tilt" href="https://github.com/Mikosh001/Hackaton-NU" target="_blank" rel="noreferrer">
-            <div class="project-top"><span class="project-index mono">02 / Hackathon</span><span class="project-arrow" aria-hidden="true">↗</span></div>
-            <div class="project-body"><h3>SpeakSpace</h3><p data-i18n="project2">AI-рөлдік диалогтар арқылы ағылшын тілін шынайы сценарийлерде жаттықтыруға арналған платформа.</p><div class="tags"><span class="tag">React</span><span class="tag">NestJS</span><span class="tag">Gemini AI</span></div></div>
+            <div class="project-top"><span class="project-index mono">03 / AI Product</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-body"><h3>SpeakSpace</h3><p data-i18n="project3">AI-рөлдік диалогтар арқылы ағылшын тілін шынайы сценарийлерде жаттықтыруға арналған платформа.</p><div class="tags"><span class="tag">React</span><span class="tag">NestJS</span><span class="tag">Gemini AI</span></div></div>
           </a>
 
           <a class="project reveal tilt" href="https://github.com/Mikosh001/MisComm-Game" target="_blank" rel="noreferrer">
-            <div class="project-top"><span class="project-index mono">03 / Game</span><span class="project-arrow" aria-hidden="true">↗</span></div>
-            <div class="project-body"><h3>MisComm Game</h3><p data-i18n="project3">Бөлме, командалар және таймерлері бар нақты уақыттағы көпойыншы веб-ойын.</p><div class="tags"><span class="tag">Socket.IO</span><span class="tag">Node.js</span><span class="tag">3 languages</span></div></div>
+            <div class="project-top"><span class="project-index mono">04 / Game</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-body"><h3>MisComm Game</h3><p data-i18n="project4">Бөлме, командалар, таймерлер және QR арқылы қосылуы бар нақты уақыттағы үштілді веб-ойын.</p><div class="tags"><span class="tag">Socket.IO</span><span class="tag">Node.js</span><span class="tag">3 languages</span></div></div>
           </a>
 
           <a class="project reveal tilt" href="https://github.com/Mikosh001/offline-music-player" target="_blank" rel="noreferrer">
-            <div class="project-top"><span class="project-index mono">04 / Product</span><span class="project-arrow" aria-hidden="true">↗</span></div>
-            <div class="project-body"><h3>Offline Music Player</h3><p data-i18n="project4">Аудионы құрылғының өзінде сақтап, интернетсіз ойнататын орнатылмалы PWA.</p><div class="tags"><span class="tag">PWA</span><span class="tag">IndexedDB</span><span class="tag">Offline-first</span></div></div>
+            <div class="project-top"><span class="project-index mono">05 / Cross-platform</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-body"><h3>Offline Music Player</h3><p data-i18n="project5">Аудионы құрылғының өзінде сақтап, интернетсіз ойнататын орнатылмалы PWA.</p><div class="tags"><span class="tag">PWA</span><span class="tag">IndexedDB</span><span class="tag">Offline-first</span></div></div>
+          </a>
+
+          <a class="project reveal tilt" href="https://github.com/Mikosh001/FInal_ITP" target="_blank" rel="noreferrer">
+            <div class="project-top"><span class="project-index mono">06 / Python</span><span class="project-arrow" aria-hidden="true">↗</span></div>
+            <div class="project-body"><h3>Finance Tracker</h3><p data-i18n="project6">Кіріс, шығыс, баланс, айлық есеп және бюджет лимитін басқаратын командалық Python жобасы.</p><div class="tags"><span class="tag">Python</span><span class="tag">OOP</span><span class="tag">JSON</span></div></div>
           </a>
         </div>
         <div class="more-projects reveal">
           <a class="repo-cta magnetic" href="https://github.com/Mikosh001?tab=repositories" target="_blank" rel="noreferrer">
-            <span class="repo-copy"><span class="repo-kicker mono" data-i18n="repoHint">GitHub / Толық архив</span><strong data-i18n="allRepos">Барлық 7 репозиторийді көру</strong></span>
-            <span class="repo-visual" aria-hidden="true"><span class="repo-node">git</span><span class="repo-node">07</span><span class="repo-node arrow">↗</span></span>
+            <span class="repo-copy"><span class="repo-kicker mono" data-i18n="repoHint">GitHub / Толық архив</span><strong data-i18n="allRepos">Барлық ашық репозиторийді көру</strong></span>
+            <span class="repo-visual" aria-hidden="true"><span class="repo-node">git</span><span class="repo-node">all</span><span class="repo-node arrow">↗</span></span>
           </a>
         </div>
       </div>
@@ -1278,6 +1491,93 @@
     </section>
   </main>
 
+  <dialog class="resume-modal" id="resume-modal" aria-labelledby="resume-title">
+    <div class="resume-shell">
+      <div class="resume-topbar">
+        <div class="resume-file mono"><span>berdibek.resume</span><b>profile.cv</b></div>
+        <div class="resume-controls">
+          <div class="resume-lang-switch" role="group" aria-label="Resume language">
+            <button class="resume-lang-btn active" type="button" data-lang="kk" aria-pressed="true">KZ</button>
+            <button class="resume-lang-btn" type="button" data-lang="ru" aria-pressed="false">RU</button>
+            <button class="resume-lang-btn" type="button" data-lang="en" aria-pressed="false">EN</button>
+          </div>
+          <button class="resume-close" type="button" aria-label="Жабу" data-i18n-aria="resumeClose">×</button>
+        </div>
+      </div>
+
+      <div class="resume-content">
+        <header class="resume-hero">
+          <div>
+            <p class="resume-kicker mono" data-i18n="resumeEyebrow">RESUME / 2026</p>
+            <h2 id="resume-title">Бердібек<br />Мейірбек</h2>
+            <p class="resume-role" data-i18n="resumeRole">Junior Software Developer / Intern · Астана, Қазақстан</p>
+          </div>
+          <div class="resume-availability">
+            <strong data-i18n="resumeStatus">Қазір іздеймін</strong>
+            <span data-i18n="resumeTarget">Junior developer немесе internship мүмкіндігі</span>
+          </div>
+        </header>
+
+        <div class="resume-grid">
+          <section class="resume-card wide">
+            <p class="resume-card-label mono" data-i18n="resumeProfileLabel">01 / Кәсіби бейін</p>
+            <p class="resume-summary" data-i18n="resumeSummary">Astana IT University-де Software Engineering мамандығының 2-курс студентімін. Frontend, backend және AI интеграцияларын біріктіріп, адамдар қолдана алатын толық өнімдер құрастырамын.</p>
+          </section>
+
+          <section class="resume-card">
+            <p class="resume-card-label mono" data-i18n="resumeEducationLabel">02 / Білім</p>
+            <h3>Astana IT University</h3>
+            <p data-i18n="resumeEducation">Software Engineering · 2-курс · Күтілетін бітіру жылы: 2028</p>
+          </section>
+
+          <section class="resume-card">
+            <p class="resume-card-label mono" data-i18n="resumeLanguagesLabel">03 / Тілдер</p>
+            <h3 data-i18n="resumeLanguagesTitle">Қазақ · Орыс · Ағылшын</h3>
+            <p data-i18n="resumeLanguages">Қазақ тілі — ана тілі; орыс тілі — жұмыс деңгейі; ағылшын тілі — A1–A2.</p>
+          </section>
+
+          <section class="resume-card wide">
+            <p class="resume-card-label mono" data-i18n="resumeHackathonsLabel">04 / Хакатондар мен турнирлер</p>
+            <div class="resume-timeline">
+              <article class="resume-event"><time>SEP · 2026</time><h3>HackAlem AI</h3><p data-i18n="resumeHack1">Qurylym AI жобасы · 404-ERROR командасы.</p></article>
+              <article class="resume-event"><time>AUG · 2026</time><h3>Caspian Hackathon</h3><p data-i18n="resumeHack2">Халықаралық экологиялық хакатон финалисі · TOLQYN AI.</p></article>
+              <article class="resume-event"><time>JAN · 2026</time><h3>GenerativeX</h3><p data-i18n="resumeHack3">Халықаралық ғылыми және стартап турнирінің финалисі · SpeakSpace.</p></article>
+              <article class="resume-event"><time>OCT · 2025</time><h3>AgroTech</h3><p data-i18n="resumeHack4">Республикалық хакатон финалисі · Профессия 2.0.</p></article>
+            </div>
+          </section>
+
+          <section class="resume-card wide">
+            <p class="resume-card-label mono" data-i18n="resumeBuildsLabel">05 / Таңдаулы тәжірибе</p>
+            <div class="resume-builds">
+              <a class="resume-build" href="https://github.com/BAITC-Hacks/hack-316738af-bek" target="_blank" rel="noreferrer"><span class="mono">AI / 01</span><div><strong>Qurylym AI</strong><p data-i18n="resumeBuild1">OpenAI API интеграциясы, frontend/backend/AI модульдерін біріктіру және құжат салыстыру.</p></div></a>
+              <a class="resume-build" href="https://github.com/Mikosh001/tolqyn-ai-BluePulse-" target="_blank" rel="noreferrer"><span class="mono">ECO / 02</span><div><strong>TOLQYN AI</strong><p data-i18n="resumeBuild2">Каспийдегі дрейф симуляциясы, OpenCV аномалия анықтау және offline demo.</p></div></a>
+              <a class="resume-build" href="https://github.com/Mikosh001/FInal_ITP" target="_blank" rel="noreferrer"><span class="mono">PY / 03</span><div><strong>Finance Tracker</strong><p data-i18n="resumeBuild3">Транзакциялар, баланс, санаттық шығындар және бюджет лимиті.</p></div></a>
+            </div>
+          </section>
+
+          <section class="resume-card wide">
+            <p class="resume-card-label mono" data-i18n="resumeSkillsLabel">06 / Техникалық стек</p>
+            <h3 data-i18n="resumeSkillsTitle">Frontend · Backend · Data · Product</h3>
+            <p data-i18n="resumeSkillsCopy">React, TypeScript, JavaScript, Python, Java, Node.js, Express, NestJS, FastAPI, REST API, Socket.IO, PostgreSQL, SQLite, Prisma, IndexedDB, Git, GitHub, Figma және Docker.</p>
+            <div class="resume-tags" aria-hidden="true"><span class="resume-tag">React</span><span class="resume-tag">TypeScript</span><span class="resume-tag">Python</span><span class="resume-tag">FastAPI</span><span class="resume-tag">Node.js</span><span class="resume-tag">PostgreSQL</span><span class="resume-tag">OpenAI API</span><span class="resume-tag">Docker</span></div>
+          </section>
+
+          <section class="resume-card wide">
+            <p class="resume-card-label mono" data-i18n="resumeCertificatesLabel">07 / Сертификаттар</p>
+            <h3 data-i18n="resumeCertificatesTitle">Astana Hub · Rice University · UC San Diego</h3>
+            <p data-i18n="resumeCertificatesCopy">Startup Academy ToT, Python Programming Essentials және Data Structures and Algorithms мамандану бағдарламалары.</p>
+            <div class="resume-actions">
+              <a class="resume-action primary" href="assets/resume/Berdibek_Meirbek_Resume_KZ.pdf" target="_blank" rel="noreferrer" data-i18n="resumePdf">Қазақша PDF ашу</a>
+              <a class="resume-action" href="https://www.linkedin.com/in/%D0%BC%D0%B5%D0%B9%D1%96%D1%80%D0%B1%D0%B5%D0%BA-%D0%B1%D0%B5%D1%80%D0%B4%D1%96%D0%B1%D0%B5%D0%BA-9a260b397/" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a class="resume-action" href="mailto:berdibekmejirbek08@gmail.com">Email</a>
+              <a class="resume-action" href="https://github.com/Mikosh001" target="_blank" rel="noreferrer">GitHub</a>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
   <footer>
     <div class="wrap footer-row mono"><span>© <span id="year"></span> Бердібек Мейірбек</span></div>
   </footer>
@@ -1286,56 +1586,68 @@
     (() => {
       // Motion is a core part of this portfolio; touch input is handled separately.
       const reduced = false;
+      const performanceLite = (navigator.deviceMemory && navigator.deviceMemory <= 4)
+        || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+        || matchMedia('(max-width: 560px)').matches;
+      document.body.classList.toggle('performance-lite', Boolean(performanceLite));
+      const syncVisibilityState = () => document.body.classList.toggle('is-background', document.hidden);
+      document.addEventListener('visibilitychange', syncVisibilityState, { passive: true });
+      syncVisibilityState();
       const translations = {
         kk: {
           pageTitle: "Бердібек Мейірбек — Software Engineer",
           description: "Бердібек Мейірбек — Astana IT University-де Software Engineering мамандығында оқитын студент және хакатон финалисі.",
           bootState: "Портфолио іске қосылуда", boot1: "01 · профиль жүктелуде", boot2: "02 · жобалар қосылуда", boot3: "03 · жүйе дайын",
           navAbout: "Мен туралы", navProjects: "Жобалар", navApproach: "Тәсіл",
-          heroKicker: "18 жастағы <b>Software Engineering</b> студентімін. Идеяны прототипке, прототипті жұмыс істейтін өнімге айналдырғанды жақсы көремін.",
-          availability: "Жаңа идеяларға ашық · Астана, KZ", viewProjects: "Жобаларды көру", aboutButton: "Мен туралы",
-          aboutId: "01 / Мен туралы", aboutHeading: "Тек код емес — жұмыс істейтін шешім.", aboutCopy: "Әр жоба — жаңа технологияны сынап, адамдарға пайдалы өнім жасау мүмкіндігі.",
-          background: "Өмір жолы", bio: "Ақтауда туып-өстім, қазір Астанада <span>Astana IT University</span>-де Software Engineering мамандығының 2-курс студентімін.", aktau: "Ақтау", astana: "Астана", currentLevel: "Қазіргі деңгей", hackMode: "Хакатон режимі", hackCopy: "Бірнеше хакатонның финалисі. Қысқа уақытта идеяны тексеріп, командамен нәтиже шығаруға үйрендім.",
+          heroKicker: "18 жастамын, <b>Astana IT University</b>-де оқимын. Frontend, backend және cross-platform product creation бағытында күн сайын күшейіп келемін.",
+          availability: "Жаңа идеяларға ашық · Астана, KZ", viewProjects: "Жобаларды көру", aboutButton: "Мен туралы", resumeButton: "Resume",
+          aboutId: "01 / Мен туралы", aboutHeading: "Ойлау. Build жасау. Алға жылжу.", aboutCopy: "Мен әрқашан ойыма келген нәрсені build жасауға тырысамын. Осы mindset мені developer ретінде алға итереді.",
+          background: "Өмір жолы", bio: "Ойыма келген нәрсені <span>build</span> жасауға тырысамын. Адамдар шынайы қолдана алатын modern, useful әрі trust-worthy өнімдер жасағанды ұнатамын.", aktau: "Ақтау", astana: "Астана", currentLevel: "Қазіргі деңгей", hackMode: "Хакатон режимі", hackCopy: "Үш хакатон мен турнирдің финалисімін. Қысқа уақытта идеяны тексеріп, командамен жұмыс істейтін нәтиже шығаруға үйрендім.",
           projectsId: "02 / Таңдаулы жобалар", projectsHeading: "Жасалған жобалар.", projectsCopy: "GitHub-тағы ашық репозиторийлерімнен бірнеше жұмыс. Әрқайсысы — ізденіс, сынақ және жинақталған тәжірибе.",
-          project1: "Каспийдегі мұнай мен қалқымалы объектілердің дрейфін болжайтын BluePulse командасының толық MVP-і.", project2: "AI-рөлдік диалогтар арқылы ағылшын тілін шынайы сценарийлерде жаттықтыруға арналған платформа.", project3: "Бөлме, командалар және таймерлері бар нақты уақыттағы көпойыншы веб-ойын.", project4: "Аудионы құрылғының өзінде сақтап, интернетсіз ойнататын орнатылмалы PWA.",
-          repoHint: "GitHub / Толық архив", allRepos: "Барлық 7 репозиторийді көру",
+          project1: "Ұйымдық құрылым мен функцияларды салыстыратын, дәлел көрсетіп, нәтижені HTML/CSV форматына экспорттайтын AI агенті.", project2: "Каспийдегі мұнай мен қалқымалы объектілердің дрейфін болжайтын BluePulse командасының толық MVP-і.", project3: "AI-рөлдік диалогтар арқылы ағылшын тілін шынайы сценарийлерде жаттықтыруға арналған платформа.", project4: "Бөлме, командалар, таймерлер және QR арқылы қосылуы бар нақты уақыттағы үштілді веб-ойын.", project5: "Аудионы құрылғының өзінде сақтап, интернетсіз ойнататын орнатылмалы PWA.", project6: "Кіріс, шығыс, баланс, айлық есеп және бюджет лимитін басқаратын командалық Python жобасы.",
+          repoHint: "GitHub / Толық архив", allRepos: "Барлық ашық репозиторийді көру",
           approachId: "03 / Процесс", approachHeading: "Ойлау. Құрастыру. Жетілдіру.", step1Index: "01 — Зерттеу", step1Title: "Мәселені түсіну", step1Copy: "Код жазудан бұрын негізгі қажеттілік пен шешімнің құндылығын анықтаймын.", step2Index: "02 — Құрастыру", step2Title: "Жылдам прототип", step2Copy: "Жұмыс істейтін нұсқаны тез құрып, идеяны нақты өнім үстінде тексеремін.", step3Index: "03 — Жетілдіру", step3Title: "Үнемі дамыту", step3Copy: "Кері байланыс пен жаңа білім арқылы кодты да, тәжірибені де жақсартамын.",
-          contactId: "04 / Бірге жасайық", contactHeading: "Келесі мықты идеяны бірге жасайық.", contactCopy: "Жаңа жоба, хакатон немесе технологиялық эксперимент болса — GitHub арқылы байланыса аласыз."
+          contactId: "04 / Бірге жасайық", contactHeading: "Келесі мықты идеяны бірге жасайық.", contactCopy: "Жаңа жоба, хакатон немесе технологиялық эксперимент болса — GitHub арқылы байланыса аласыз.",
+          resumeClose: "Resume жабу", resumeEyebrow: "RESUME / 2026", resumeRole: "Junior Software Developer / Intern · Астана, Қазақстан", resumeStatus: "Қазір іздеймін", resumeTarget: "Junior developer немесе internship мүмкіндігі", resumeProfileLabel: "01 / Кәсіби бейін", resumeSummary: "Astana IT University-де Software Engineering мамандығының 2-курс студентімін. Frontend, backend және AI интеграцияларын біріктіріп, адамдар қолдана алатын толық өнімдер құрастырамын.", resumeEducationLabel: "02 / Білім", resumeEducation: "Software Engineering · 2-курс · Күтілетін бітіру жылы: 2028", resumeLanguagesLabel: "03 / Тілдер", resumeLanguagesTitle: "Қазақ · Орыс · Ағылшын", resumeLanguages: "Қазақ тілі — ана тілі; орыс тілі — жұмыс деңгейі; ағылшын тілі — A1–A2.", resumeHackathonsLabel: "04 / Хакатондар мен турнирлер", resumeHack1: "Qurylym AI жобасы · 404-ERROR командасы.", resumeHack2: "Халықаралық экологиялық хакатон финалисі · TOLQYN AI.", resumeHack3: "Халықаралық ғылыми және стартап турнирінің финалисі · SpeakSpace.", resumeHack4: "Республикалық хакатон финалисі · Профессия 2.0.", resumeBuildsLabel: "05 / Таңдаулы тәжірибе", resumeBuild1: "OpenAI API интеграциясы, frontend/backend/AI модульдерін біріктіру және құжат салыстыру.", resumeBuild2: "Каспийдегі дрейф симуляциясы, OpenCV аномалия анықтау және offline demo.", resumeBuild3: "Транзакциялар, баланс, санаттық шығындар және бюджет лимиті.", resumeSkillsLabel: "06 / Техникалық стек", resumeSkillsTitle: "Frontend · Backend · Data · Product", resumeSkillsCopy: "React, TypeScript, JavaScript, Python, Java, Node.js, Express, NestJS, FastAPI, REST API, Socket.IO, PostgreSQL, SQLite, Prisma, IndexedDB, Git, GitHub, Figma және Docker.", resumeCertificatesLabel: "07 / Сертификаттар", resumeCertificatesTitle: "Astana Hub · Rice University · UC San Diego", resumeCertificatesCopy: "Startup Academy ToT, Python Programming Essentials және Data Structures and Algorithms мамандану бағдарламалары.", resumePdf: "Қазақша PDF ашу"
         },
         ru: {
           pageTitle: "Бердибек Мейирбек — Software Engineer",
           description: "Бердибек Мейирбек — студент Software Engineering в Astana IT University и финалист хакатонов.",
           bootState: "Запуск портфолио", boot1: "01 · загрузка профиля", boot2: "02 · подключение проектов", boot3: "03 · система готова",
           navAbout: "Обо мне", navProjects: "Проекты", navApproach: "Подход",
-          heroKicker: "Мне 18 лет, я студент <b>Software Engineering</b>. Люблю превращать идею в прототип, а прототип — в работающий продукт.",
-          availability: "Открыт новым идеям · Астана, KZ", viewProjects: "Смотреть проекты", aboutButton: "Обо мне",
-          aboutId: "01 / Обо мне", aboutHeading: "Не просто код — работающее решение.", aboutCopy: "Каждый проект — возможность испытать новую технологию и создать полезный людям продукт.",
-          background: "Мой путь", bio: "Я родился и вырос в Актау, а сейчас учусь в Астане на 2-м курсе <span>Astana IT University</span> по специальности Software Engineering.", aktau: "Актау", astana: "Астана", currentLevel: "Текущий уровень", hackMode: "Режим хакатона", hackCopy: "Финалист нескольких хакатонов. Научился быстро проверять идеи и добиваться результата вместе с командой.",
+          heroKicker: "Мне 18 лет, я учусь в <b>Astana IT University</b> и каждый день развиваюсь во frontend, backend и cross-platform product creation.",
+          availability: "Открыт новым идеям · Астана, KZ", viewProjects: "Смотреть проекты", aboutButton: "Обо мне", resumeButton: "Резюме",
+          aboutId: "01 / Обо мне", aboutHeading: "Думать. Создавать. Двигаться вперёд.", aboutCopy: "Я всегда стараюсь построить то, что приходит мне в голову. Этот mindset двигает меня вперёд как разработчика.",
+          background: "Мой путь", bio: "Я стараюсь <span>build</span> каждую идею, которая приходит мне в голову. Мне нравится создавать modern, useful и trust-worthy продукты, которыми люди действительно могут пользоваться.", aktau: "Актау", astana: "Астана", currentLevel: "Текущий уровень", hackMode: "Режим хакатона", hackCopy: "Я финалист трёх хакатонов и турниров. Умею быстро проверять идеи и вместе с командой доводить их до работающего результата.",
           projectsId: "02 / Избранные проекты", projectsHeading: "Созданные проекты.", projectsCopy: "Несколько работ из моих открытых репозиториев GitHub. Каждая из них — поиск, эксперименты и накопленный опыт.",
-          project1: "Полноценный MVP команды BluePulse, прогнозирующий дрейф нефти и плавающих объектов в Каспийском море.", project2: "Платформа для практики английского языка в реалистичных сценариях через ролевые диалоги с AI.", project3: "Многопользовательская веб-игра в реальном времени с комнатами, командами и таймерами.", project4: "Устанавливаемое PWA, которое хранит аудио на устройстве и воспроизводит его без интернета.",
-          repoHint: "GitHub / Полный архив", allRepos: "Посмотреть все 7 репозиториев",
+          project1: "AI-агент, который сравнивает организационные структуры и функции, показывает доказательства и экспортирует результат в HTML/CSV.", project2: "Полноценный MVP команды BluePulse, прогнозирующий дрейф нефти и плавающих объектов в Каспийском море.", project3: "Платформа для практики английского языка в реалистичных сценариях через ролевые диалоги с AI.", project4: "Трёхъязычная многопользовательская веб-игра в реальном времени с комнатами, командами, таймерами и QR-подключением.", project5: "Устанавливаемое PWA, которое хранит аудио на устройстве и воспроизводит его без интернета.", project6: "Командный Python-проект для учёта доходов, расходов, баланса, месячных отчётов и бюджетных лимитов.",
+          repoHint: "GitHub / Полный архив", allRepos: "Посмотреть все открытые репозитории",
           approachId: "03 / Процесс", approachHeading: "Осмыслить. Создать. Улучшить.", step1Index: "01 — Исследование", step1Title: "Понять задачу", step1Copy: "До написания кода определяю главную потребность и ценность решения.", step2Index: "02 — Создание", step2Title: "Быстрый прототип", step2Copy: "Быстро собираю рабочую версию и проверяю идею на реальном продукте.", step3Index: "03 — Итерация", step3Title: "Постоянное развитие", step3Copy: "Улучшаю код и опыт с помощью обратной связи и новых знаний.",
-          contactId: "04 / Создадим вместе", contactHeading: "Давайте создадим следующую сильную идею вместе.", contactCopy: "Если у вас есть новый проект, хакатон или технологический эксперимент — свяжитесь со мной через GitHub."
+          contactId: "04 / Создадим вместе", contactHeading: "Давайте создадим следующую сильную идею вместе.", contactCopy: "Если у вас есть новый проект, хакатон или технологический эксперимент — свяжитесь со мной через GitHub.",
+          resumeClose: "Закрыть резюме", resumeEyebrow: "РЕЗЮМЕ / 2026", resumeRole: "Junior Software Developer / Intern · Астана, Казахстан", resumeStatus: "Ищу сейчас", resumeTarget: "Возможность Junior developer или internship", resumeProfileLabel: "01 / Профессиональный профиль", resumeSummary: "Я студент 2-го курса Software Engineering в Astana IT University. Объединяю frontend, backend и AI-интеграции, чтобы создавать цельные продукты, которыми могут пользоваться люди.", resumeEducationLabel: "02 / Образование", resumeEducation: "Software Engineering · 2-й курс · Ожидаемый выпуск: 2028", resumeLanguagesLabel: "03 / Языки", resumeLanguagesTitle: "Казахский · Русский · Английский", resumeLanguages: "Казахский — родной; русский — рабочий уровень; английский — A1–A2.", resumeHackathonsLabel: "04 / Хакатоны и турниры", resumeHack1: "Проект Qurylym AI · команда 404-ERROR.", resumeHack2: "Финалист международного экологического хакатона · TOLQYN AI.", resumeHack3: "Финалист международного научного и стартап-турнира · SpeakSpace.", resumeHack4: "Финалист республиканского хакатона · Профессия 2.0.", resumeBuildsLabel: "05 / Избранный опыт", resumeBuild1: "Интеграция OpenAI API, объединение frontend/backend/AI модулей и сравнение документов.", resumeBuild2: "Симуляция дрейфа в Каспии, определение аномалий OpenCV и offline demo.", resumeBuild3: "Транзакции, баланс, расходы по категориям и бюджетные лимиты.", resumeSkillsLabel: "06 / Технический стек", resumeSkillsTitle: "Frontend · Backend · Data · Product", resumeSkillsCopy: "React, TypeScript, JavaScript, Python, Java, Node.js, Express, NestJS, FastAPI, REST API, Socket.IO, PostgreSQL, SQLite, Prisma, IndexedDB, Git, GitHub, Figma и Docker.", resumeCertificatesLabel: "07 / Сертификаты", resumeCertificatesTitle: "Astana Hub · Rice University · UC San Diego", resumeCertificatesCopy: "Startup Academy ToT, Python Programming Essentials и специализация Data Structures and Algorithms.", resumePdf: "Открыть PDF на казахском"
         },
         en: {
           pageTitle: "Berdibek Meiirbek — Software Engineer",
           description: "Berdibek Meiirbek is a Software Engineering student at Astana IT University and a hackathon finalist.",
           bootState: "Initializing portfolio", boot1: "01 · loading profile", boot2: "02 · mounting projects", boot3: "03 · system ready",
           navAbout: "About", navProjects: "Projects", navApproach: "Approach",
-          heroKicker: "I am an 18-year-old <b>Software Engineering</b> student. I enjoy turning ideas into prototypes and prototypes into working products.",
-          availability: "Open to new ideas · Astana, KZ", viewProjects: "View projects", aboutButton: "About me",
-          aboutId: "01 / About me", aboutHeading: "More than code — a working solution.", aboutCopy: "Every project is a chance to explore new technology and build something useful for people.",
-          background: "Background", bio: "Born and raised in Aktau, I now study Software Engineering as a second-year student at <span>Astana IT University</span> in Astana.", aktau: "Aktau", astana: "Astana", currentLevel: "Current level", hackMode: "Hackathon mode", hackCopy: "A finalist in several hackathons. I have learned to validate ideas quickly and deliver results with a team.",
+          heroKicker: "I am 18 and study at <b>Astana IT University</b>. Every day I grow across frontend, backend, and cross-platform product creation.",
+          availability: "Open to new ideas · Astana, KZ", viewProjects: "View projects", aboutButton: "About me", resumeButton: "Resume",
+          aboutId: "01 / About me", aboutHeading: "Think. Build. Move forward.", aboutCopy: "I always try to build what comes to mind. That mindset keeps pushing me forward as a developer.",
+          background: "My path", bio: "I try to <span>build</span> every idea that comes to mind. I enjoy creating modern, useful, and trustworthy products that people can genuinely use.", aktau: "Aktau", astana: "Astana", currentLevel: "Current level", hackMode: "Hackathon mode", hackCopy: "I am a finalist in three hackathons and tournaments. I know how to validate ideas quickly and turn them into working results with a team.",
           projectsId: "02 / Selected work", projectsHeading: "Projects I have built.", projectsCopy: "A selection from my public GitHub repositories. Each one represents exploration, experiments, and experience gained.",
-          project1: "BluePulse's complete MVP for forecasting the drift of oil and floating objects in the Caspian Sea.", project2: "A platform for practicing English in real-life scenarios through AI-powered roleplay conversations.", project3: "A real-time multiplayer web game with rooms, teams, and timed rounds.", project4: "An installable PWA that keeps audio on the device and plays it without an internet connection.",
-          repoHint: "GitHub / Complete archive", allRepos: "Explore all 7 repositories",
+          project1: "An AI agent that compares organizational structures and functions, shows evidence, and exports results to HTML/CSV.", project2: "BluePulse's complete MVP for forecasting the drift of oil and floating objects in the Caspian Sea.", project3: "A platform for practicing English in real-life scenarios through AI-powered roleplay conversations.", project4: "A trilingual real-time multiplayer web game with rooms, teams, timers, and QR joining.", project5: "An installable PWA that keeps audio on the device and plays it without an internet connection.", project6: "A team-built Python app for income, expenses, balances, monthly reports, and budget limits.",
+          repoHint: "GitHub / Complete archive", allRepos: "Explore all public repositories",
           approachId: "03 / Process", approachHeading: "Think. Build. Improve.", step1Index: "01 — Explore", step1Title: "Understand the problem", step1Copy: "Before writing code, I identify the core need and the value of the solution.", step2Index: "02 — Build", step2Title: "Prototype fast", step2Copy: "I build a working version quickly and validate the idea through a real product.", step3Index: "03 — Iterate", step3Title: "Keep improving", step3Copy: "I improve both the code and the experience through feedback and new knowledge.",
-          contactId: "04 / Let's build", contactHeading: "Let's build the next strong idea together.", contactCopy: "Have a new project, hackathon, or technology experiment? Reach out through GitHub."
+          contactId: "04 / Let's build", contactHeading: "Let's build the next strong idea together.", contactCopy: "Have a new project, hackathon, or technology experiment? Reach out through GitHub.",
+          resumeClose: "Close resume", resumeEyebrow: "RESUME / 2026", resumeRole: "Junior Software Developer / Intern · Astana, Kazakhstan", resumeStatus: "Now seeking", resumeTarget: "A Junior developer or internship opportunity", resumeProfileLabel: "01 / Professional profile", resumeSummary: "I am a second-year Software Engineering student at Astana IT University. I combine frontend, backend, and AI integrations to build complete products people can actually use.", resumeEducationLabel: "02 / Education", resumeEducation: "Software Engineering · Year 2 · Expected graduation: 2028", resumeLanguagesLabel: "03 / Languages", resumeLanguagesTitle: "Kazakh · Russian · English", resumeLanguages: "Kazakh — native; Russian — working proficiency; English — A1–A2.", resumeHackathonsLabel: "04 / Hackathons and tournaments", resumeHack1: "Qurylym AI project · 404-ERROR team.", resumeHack2: "Finalist of an international environmental hackathon · TOLQYN AI.", resumeHack3: "Finalist of an international science and startup tournament · SpeakSpace.", resumeHack4: "Finalist of a national hackathon · Profession 2.0.", resumeBuildsLabel: "05 / Selected experience", resumeBuild1: "OpenAI API integration, frontend/backend/AI module integration, and document comparison.", resumeBuild2: "Caspian drift simulation, OpenCV anomaly detection, and an offline demo.", resumeBuild3: "Transactions, balance, category spending, and budget limits.", resumeSkillsLabel: "06 / Technical stack", resumeSkillsTitle: "Frontend · Backend · Data · Product", resumeSkillsCopy: "React, TypeScript, JavaScript, Python, Java, Node.js, Express, NestJS, FastAPI, REST API, Socket.IO, PostgreSQL, SQLite, Prisma, IndexedDB, Git, GitHub, Figma, and Docker.", resumeCertificatesLabel: "07 / Certificates", resumeCertificatesTitle: "Astana Hub · Rice University · UC San Diego", resumeCertificatesCopy: "Startup Academy ToT, Python Programming Essentials, and the Data Structures and Algorithms specialization.", resumePdf: "Open Kazakh PDF"
         }
       };
 
       const languageSwitch = document.querySelector('.lang-switch');
       const languageTransition = document.querySelector('.language-transition');
+      const resumeModal = document.getElementById('resume-modal');
+      const resumeContent = resumeModal.querySelector('.resume-content');
       const languageOrder = ['kk', 'ru', 'en'];
       const positionLanguageIndicator = (selected) => {
         const activeLanguageButton = languageSwitch.querySelector(`[data-lang="${selected}"]`);
@@ -1357,7 +1669,11 @@
           const value = copy[element.dataset.i18nHtml];
           if (value) element.innerHTML = value;
         });
-        document.querySelectorAll('.lang-btn').forEach((button) => {
+        document.querySelectorAll('[data-i18n-aria]').forEach((element) => {
+          const value = copy[element.dataset.i18nAria];
+          if (value) element.setAttribute('aria-label', value);
+        });
+        document.querySelectorAll('.lang-btn, .resume-lang-btn').forEach((button) => {
           const active = button.dataset.lang === selected;
           button.classList.toggle('active', active);
           button.setAttribute('aria-pressed', String(active));
@@ -1371,10 +1687,10 @@
       applyLanguage(initialLanguage);
       addEventListener('resize', () => positionLanguageIndicator(document.documentElement.lang), { passive: true });
       let languageSwitching = false;
-      document.querySelectorAll('.lang-btn').forEach((button) => {
+      document.querySelectorAll('.lang-btn, .resume-lang-btn').forEach((button) => {
         button.addEventListener('click', () => {
           const nextLanguage = button.dataset.lang;
-          if (button.classList.contains('active') || languageSwitching) return;
+          if (document.documentElement.lang === nextLanguage || languageSwitching) return;
           if (reduced) {
             applyLanguage(nextLanguage);
             return;
@@ -1392,6 +1708,11 @@
           languageTransition.classList.add('active');
           languageSwitch.classList.add('is-changing');
           button.classList.add('is-selecting');
+          if (resumeModal.open) {
+            resumeContent.classList.remove('is-translating');
+            void resumeContent.offsetWidth;
+            resumeContent.classList.add('is-translating');
+          }
 
           setTimeout(() => {
             applyLanguage(nextLanguage);
@@ -1403,6 +1724,7 @@
             languageTransition.classList.remove('active');
             languageSwitch.classList.remove('is-changing');
             button.classList.remove('is-selecting');
+            resumeContent.classList.remove('is-translating');
             document.body.classList.remove('language-refresh');
             languageSwitching = false;
           }, 840);
@@ -1410,6 +1732,33 @@
       });
 
       document.getElementById('year').textContent = new Date().getFullYear();
+
+      const openResume = () => {
+        if (resumeModal.open) return;
+        resumeModal.classList.remove('is-closing');
+        resumeModal.showModal();
+        document.body.classList.add('resume-open');
+        requestAnimationFrame(() => resumeModal.querySelector('.resume-close').focus({ preventScroll: true }));
+      };
+      const closeResume = () => {
+        if (!resumeModal.open || resumeModal.classList.contains('is-closing')) return;
+        resumeModal.classList.add('is-closing');
+        setTimeout(() => {
+          resumeModal.close();
+          resumeModal.classList.remove('is-closing');
+          document.body.classList.remove('resume-open');
+        }, 410);
+      };
+      document.querySelectorAll('.resume-trigger').forEach((button) => button.addEventListener('click', openResume));
+      resumeModal.querySelector('.resume-close').addEventListener('click', closeResume);
+      resumeModal.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeResume();
+      });
+      resumeModal.addEventListener('click', (event) => {
+        if (event.target === resumeModal) closeResume();
+      });
+      resumeModal.addEventListener('close', () => document.body.classList.remove('resume-open'));
 
       const boot = document.getElementById('boot');
       setTimeout(() => {
@@ -1544,6 +1893,13 @@
       if (location.hash) {
         const initialSection = document.querySelector(location.hash);
         initialSection?.querySelectorAll('.reveal').forEach(revealIn);
+      }
+
+      if ('IntersectionObserver' in window) {
+        const motionObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => entry.target.classList.toggle('motion-paused', !entry.isIntersecting));
+        }, { rootMargin: '220px 0px' });
+        document.querySelectorAll('main > section').forEach((section) => motionObserver.observe(section));
       }
 
       const touchExperience = matchMedia('(hover: none), (pointer: coarse)').matches || innerWidth <= 850;
