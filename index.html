@@ -19,8 +19,6 @@
       --lime: #c6ff3d;
       --violet: #a88bff;
       --cyan: #67e8f9;
-      --mx: 50vw;
-      --my: 20vh;
       --radius: 22px;
       --ease: cubic-bezier(.2,.8,.2,1);
     }
@@ -30,13 +28,26 @@
     body {
       margin: 0;
       color: var(--ink);
-      background:
-        radial-gradient(600px circle at var(--mx) var(--my), rgba(198,255,61,.085), transparent 42%),
-        var(--base);
+      background: var(--base);
+      isolation: isolate;
       font-family: "Segoe UI", Inter, Arial, sans-serif;
       font-size: 16px;
       line-height: 1.55;
       overflow-x: hidden;
+    }
+
+    .ambient-field { position: absolute; z-index: -1; top: 0; left: 0; right: 0; height: calc(100vh + 600px); overflow: hidden; pointer-events: none; contain: strict; }
+    .ambient-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1200px;
+      height: 1200px;
+      pointer-events: none;
+      contain: strict;
+      background: radial-gradient(600px circle at center, rgba(198,255,61,.085), transparent 42%);
+      transform: translate3d(calc(50vw - 600px), calc(20vh - 600px), 0);
+      will-change: transform;
     }
 
     body::before {
@@ -109,7 +120,9 @@
       z-index: 110;
       top: 0;
       left: 0;
-      width: var(--scroll, 0%);
+      width: 100%;
+      transform: scaleX(0);
+      transform-origin: left;
       height: 2px;
       background: linear-gradient(90deg, var(--lime), var(--cyan));
       box-shadow: 0 0 18px rgba(198,255,61,.55);
@@ -189,8 +202,8 @@
       100% { opacity: 0; transform: scale(1.2) rotate(4deg); filter: blur(8px); }
     }
     @keyframes language-scan { 25%,65% { opacity: .5; transform: translateY(0); } 100% { opacity: 0; transform: translateY(24px); } }
-    body.language-refresh [data-i18n],
-    body.language-refresh [data-i18n-html] { animation: language-text .5s var(--ease) both; }
+    body.language-refresh:not(.resume-open) [data-i18n],
+    body.language-refresh:not(.resume-open) [data-i18n-html] { animation: language-text .5s var(--ease) both; }
     @keyframes language-text {
       from { opacity: 0; transform: translateY(13px); }
       to { opacity: 1; transform: translateY(0); }
@@ -538,12 +551,13 @@
       pointer-events: none;
       opacity: .22;
       background-image:
-        radial-gradient(190px circle at var(--glare-x) var(--glare-y), rgba(198,255,61,.3), transparent 65%),
         linear-gradient(rgba(198,255,61,.12) 1px, transparent 1px),
         linear-gradient(90deg, rgba(198,255,61,.1) 1px, transparent 1px);
-      background-size: auto, 24px 24px, 24px 24px;
+      background-size: 24px 24px, 24px 24px;
       mask-image: linear-gradient(to bottom, transparent, #000 30%, transparent);
     }
+    .terminal-light { position: absolute; inset: 0; overflow: hidden; pointer-events: none; opacity: .22; mask-image: linear-gradient(to bottom, transparent, #000 30%, transparent); }
+    .terminal-glare { position: absolute; top: 0; left: 0; width: 380px; height: 380px; background: radial-gradient(190px circle at center, rgba(198,255,61,.3), transparent 65%); will-change: transform; }
     .terminal::after {
       content: "";
       position: absolute;
@@ -714,6 +728,7 @@
     .bio-card { grid-row: span 2; min-height: 450px; display: flex; flex-direction: column; justify-content: space-between; }
     .bio-card .quote { margin: 0; max-width: 620px; font-size: clamp(1.7rem, 3.5vw, 3rem); line-height: 1.12; letter-spacing: -.045em; transition: transform .45s var(--ease), text-shadow .45s ease; }
     .bio-card .quote span { color: var(--lime); }
+    .bio-note { margin: 20px 0 24px; max-width: 580px; color: var(--muted); font-size: 1rem; line-height: 1.6; }
     .bio-card:hover .quote { transform: translateZ(42px) translateY(-4px); text-shadow: 0 16px 36px rgba(0,0,0,.32); }
     .card-label { position: relative; z-index: 2; color: var(--muted); }
     .card-label::after { content: "_"; margin-left: 6px; color: var(--lime); animation: terminal-blink 1s steps(1) infinite; }
@@ -725,13 +740,13 @@
     .bio-card:hover .route { animation: route-pulse .8s var(--ease) infinite alternate; }
     @keyframes route-pulse { to { transform: translateX(8px); text-shadow: 0 0 16px rgba(198,255,61,.55); } }
     .stat-card { min-height: 218px; display: flex; flex-direction: column; justify-content: space-between; }
-    .stat-num { position: relative; z-index: 2; font-size: clamp(4rem, 8vw, 6rem); font-weight: 850; line-height: .8; letter-spacing: -.07em; transition: color .3s ease, transform .35s var(--ease), text-shadow .3s ease; }
+    .stat-num { position: relative; z-index: 2; padding-bottom: 27px; font-size: clamp(4rem, 8vw, 6rem); font-weight: 850; line-height: .8; letter-spacing: -.07em; transition: color .3s ease, transform .35s var(--ease), text-shadow .3s ease; }
     .stat-num small { color: var(--lime); font-size: .3em; letter-spacing: 0; }
     .stat-num::after {
       content: "LEVEL SYNC";
       position: absolute;
       left: 3px;
-      bottom: -25px;
+      bottom: 0;
       color: var(--dim);
       font: 600 .58rem/1 "Cascadia Code", monospace;
       letter-spacing: .16em;
@@ -1047,6 +1062,7 @@
       height: min(900px, calc(100dvh - 34px));
       overflow: auto;
       overscroll-behavior: contain;
+      isolation: isolate;
       scrollbar-width: thin;
       scrollbar-color: rgba(198,255,61,.45) transparent;
       border: 1px solid rgba(198,255,61,.24);
@@ -1087,6 +1103,7 @@
       border-bottom: 1px solid var(--line);
       background: rgba(8,10,9,.86);
       backdrop-filter: blur(18px);
+      transform: translateZ(0);
     }
     .resume-file { display: flex; align-items: center; gap: 10px; color: #cbd0c8; }
     .resume-file::before { content: ""; width: 8px; aspect-ratio: 1; border-radius: 50%; background: var(--lime); box-shadow: 0 0 16px var(--lime); }
@@ -1121,7 +1138,7 @@
     }
     .resume-close:hover { transform: rotate(90deg) scale(1.08); color: #080a09; border-color: var(--lime); background: var(--lime); }
     .resume-content { padding: clamp(28px, 5vw, 70px); transform-origin: 50% 10%; }
-    .resume-content.is-translating { animation: resume-language-swap .68s var(--ease) both; }
+    .resume-content.is-translating { animation: resume-language-swap .68s var(--ease) both; will-change: transform, opacity, filter; }
     @keyframes resume-language-swap {
       0% { opacity: 1; transform: perspective(900px) rotateY(0); filter: blur(0); }
       45% { opacity: 0; transform: perspective(900px) rotateY(7deg) translateX(-28px); filter: blur(8px); }
@@ -1144,10 +1161,11 @@
       border: 1px solid var(--line);
       border-radius: 20px;
       background: rgba(255,255,255,.025);
+      contain: layout style;
       transition: transform .35s var(--ease), border-color .3s ease, background .3s ease, box-shadow .3s ease;
     }
     .resume-card.wide { grid-column: 1 / -1; }
-    .resume-card::before { content: ""; position: absolute; inset: 0; opacity: 0; pointer-events: none; background: radial-gradient(360px circle at 90% 10%, rgba(198,255,61,.12), transparent 55%); transition: opacity .35s ease; }
+    .resume-card::before { content: ""; position: absolute; inset: 0; opacity: 0; pointer-events: none; background: radial-gradient(360px circle at var(--resume-x, 90%) var(--resume-y, 10%), rgba(198,255,61,.12), transparent 55%); transition: opacity .35s ease; }
     .resume-card:hover { transform: translateY(-5px); border-color: rgba(198,255,61,.36); background: rgba(198,255,61,.035); box-shadow: 0 22px 52px rgba(0,0,0,.26); }
     .resume-card:hover::before { opacity: 1; }
     .resume-card > * { position: relative; z-index: 1; }
@@ -1175,6 +1193,20 @@
     .resume-action.primary { color: #080a09; border-color: var(--lime); background: var(--lime); }
     .resume-action:hover { transform: translateY(-4px); border-color: var(--lime); }
     .resume-action.primary:hover { box-shadow: 0 12px 28px rgba(198,255,61,.18); }
+
+    .resume-card.resume-entering { animation: resume-card-arrive .65s var(--ease) both; will-change: transform, opacity; }
+    @keyframes resume-card-arrive { from { opacity: 0; transform: perspective(1000px) translateY(24px) rotateX(4deg) scale(.985); } to { opacity: 1; transform: none; } }
+    .resume-card.resume-active::before { opacity: 1; }
+    .resume-card.resume-active { border-color: rgba(198,255,61,.36); }
+    .resume-event.resume-active { border-color: rgba(168,139,255,.45); }
+    .resume-build.resume-active { border-color: rgba(198,255,61,.4); }
+    .resume-tags .resume-tag { transition: transform .25s var(--ease), border-color .25s ease, color .25s ease; }
+    .resume-tag:hover { transform: translateY(-3px); border-color: var(--lime); color: var(--ink); }
+    .resume-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, var(--lime), var(--cyan)); }
+    .resume-action, .resume-lang-btn { overflow: hidden; }
+    body.resume-open main *, body.resume-open main *::before, body.resume-open main *::after,
+    body.is-background *, body.is-background *::before, body.is-background *::after,
+    section.motion-paused *, section.motion-paused *::before, section.motion-paused *::after { animation-play-state: paused !important; }
 
     body.is-background .eyebrow .signal,
     body.is-background .terminal::after,
@@ -1291,6 +1323,7 @@
   </style>
 </head>
 <body>
+  <div class="ambient-field" aria-hidden="true"><div class="ambient-glow"></div></div>
   <div class="boot" id="boot" role="status" aria-label="Портфолио жүктелуде">
     <div class="boot-inner">
       <div class="boot-top"><span class="boot-mark">B</span><span class="boot-state mono" data-i18n="bootState">Портфолио іске қосылуда</span></div>
@@ -1341,6 +1374,7 @@
         <aside class="hero-side" aria-label="Қысқаша профиль">
           <div class="terminal-scene">
             <div class="terminal">
+              <div class="terminal-light" aria-hidden="true"><div class="terminal-glare"></div></div>
               <div class="terminal-head mono"><span>profile.json</span><span class="terminal-dots"><i></i><i></i><i></i></span></div>
               <div class="terminal-code" aria-label="Профиль деректері">
                 <div class="terminal-line"><span class="comment">// currently building</span></div>
@@ -1393,7 +1427,7 @@
         <div class="about-grid">
           <article class="card bio-card reveal">
             <p class="card-label mono" data-i18n="background">Background</p>
-            <p class="quote" data-i18n-html="bio">Ойыма келген нәрсені <span>build</span> жасауға тырысамын. Адамдар шынайы қолдана алатын modern, useful әрі trust-worthy өнімдер жасағанды ұнатамын.</p>
+            <div><p class="quote" data-i18n-html="bio">Ақтауда тудым. Астанада <span>AITU</span>-де Software Engineering оқып жүрмін. Идеяларымды frontend, backend және AI арқылы нақты өнімге айналдырамын.</p><p class="bio-note" data-i18n="bioDetail">Хакатондарда командамен жылдам MVP құрып, финалға шықтым. Әр жобадағы мақсатым — адамға пайдалы, түсінікті әрі сенімді өнім жасау.</p></div>
             <div class="card-bottom">
               <div class="city-line"><span data-i18n="aktau">Ақтау</span><span class="route">⟶</span><span data-i18n="astana">Астана</span></div>
               <span class="mono card-label">43.65°N → 51.17°N</span>
@@ -1494,6 +1528,7 @@
   <dialog class="resume-modal" id="resume-modal" aria-labelledby="resume-title">
     <div class="resume-shell">
       <div class="resume-topbar">
+        <div class="resume-progress" aria-hidden="true"></div>
         <div class="resume-file mono"><span>berdibek.resume</span><b>profile.cv</b></div>
         <div class="resume-controls">
           <div class="resume-lang-switch" role="group" aria-label="Resume language">
@@ -1590,7 +1625,37 @@
         || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
         || matchMedia('(max-width: 560px)').matches;
       document.body.classList.toggle('performance-lite', Boolean(performanceLite));
-      const syncVisibilityState = () => document.body.classList.toggle('is-background', document.hidden);
+      const motionTasks = new Set();
+      let motionFrame = 0;
+      let syncPageMotion = () => {};
+      const renderMotion = (time) => {
+        motionFrame = 0;
+        if (document.hidden) return;
+        for (const task of motionTasks) if (task(time) === false) motionTasks.delete(task);
+        if (motionTasks.size && !motionFrame) motionFrame = requestAnimationFrame(renderMotion);
+      };
+      const queueMotion = (task) => {
+        motionTasks.add(task);
+        if (!motionFrame && !document.hidden) motionFrame = requestAnimationFrame(renderMotion);
+      };
+      const cancelMotion = (task) => {
+        motionTasks.delete(task);
+        if (!motionTasks.size && motionFrame) { cancelAnimationFrame(motionFrame); motionFrame = 0; }
+      };
+      const styleCache = new WeakMap();
+      const paintStyle = (element, property, value) => {
+        let values = styleCache.get(element);
+        if (!values) { values = new Map(); styleCache.set(element, values); }
+        if (values.get(property) === value) return;
+        values.set(property, value);
+        element.style[property] = value;
+      };
+      const syncVisibilityState = () => {
+        document.body.classList.toggle('is-background', document.hidden);
+        if (document.hidden && motionFrame) { cancelAnimationFrame(motionFrame); motionFrame = 0; }
+        syncPageMotion();
+        if (!document.hidden && motionTasks.size && !motionFrame) motionFrame = requestAnimationFrame(renderMotion);
+      };
       document.addEventListener('visibilitychange', syncVisibilityState, { passive: true });
       syncVisibilityState();
       const translations = {
@@ -1602,7 +1667,7 @@
           heroKicker: "18 жастамын, <b>Astana IT University</b>-де оқимын. Frontend, backend және cross-platform product creation бағытында күн сайын күшейіп келемін.",
           availability: "Жаңа идеяларға ашық · Астана, KZ", viewProjects: "Жобаларды көру", aboutButton: "Мен туралы", resumeButton: "Resume",
           aboutId: "01 / Мен туралы", aboutHeading: "Ойлау. Build жасау. Алға жылжу.", aboutCopy: "Мен әрқашан ойыма келген нәрсені build жасауға тырысамын. Осы mindset мені developer ретінде алға итереді.",
-          background: "Өмір жолы", bio: "Ойыма келген нәрсені <span>build</span> жасауға тырысамын. Адамдар шынайы қолдана алатын modern, useful әрі trust-worthy өнімдер жасағанды ұнатамын.", aktau: "Ақтау", astana: "Астана", currentLevel: "Қазіргі деңгей", hackMode: "Хакатон режимі", hackCopy: "Үш хакатон мен турнирдің финалисімін. Қысқа уақытта идеяны тексеріп, командамен жұмыс істейтін нәтиже шығаруға үйрендім.",
+          background: "Өмір жолы", bio: "Ақтауда тудым. Астанада <span>AITU</span>-де Software Engineering оқып жүрмін. Идеяларымды frontend, backend және AI арқылы нақты өнімге айналдырамын.", bioDetail: "Хакатондарда командамен жылдам MVP құрып, финалға шықтым. Әр жобадағы мақсатым — адамға пайдалы, түсінікті әрі сенімді өнім жасау.", aktau: "Ақтау", astana: "Астана", currentLevel: "Қазіргі деңгей", hackMode: "Хакатон режимі", hackCopy: "Үш хакатон мен турнирдің финалисімін. Қысқа уақытта идеяны тексеріп, командамен жұмыс істейтін нәтиже шығаруға үйрендім.",
           projectsId: "02 / Таңдаулы жобалар", projectsHeading: "Жасалған жобалар.", projectsCopy: "GitHub-тағы ашық репозиторийлерімнен бірнеше жұмыс. Әрқайсысы — ізденіс, сынақ және жинақталған тәжірибе.",
           project1: "Ұйымдық құрылым мен функцияларды салыстыратын, дәлел көрсетіп, нәтижені HTML/CSV форматына экспорттайтын AI агенті.", project2: "Каспийдегі мұнай мен қалқымалы объектілердің дрейфін болжайтын BluePulse командасының толық MVP-і.", project3: "AI-рөлдік диалогтар арқылы ағылшын тілін шынайы сценарийлерде жаттықтыруға арналған платформа.", project4: "Бөлме, командалар, таймерлер және QR арқылы қосылуы бар нақты уақыттағы үштілді веб-ойын.", project5: "Аудионы құрылғының өзінде сақтап, интернетсіз ойнататын орнатылмалы PWA.", project6: "Кіріс, шығыс, баланс, айлық есеп және бюджет лимитін басқаратын командалық Python жобасы.",
           repoHint: "GitHub / Толық архив", allRepos: "Барлық ашық репозиторийді көру",
@@ -1618,7 +1683,7 @@
           heroKicker: "Мне 18 лет, я учусь в <b>Astana IT University</b> и каждый день развиваюсь во frontend, backend и cross-platform product creation.",
           availability: "Открыт новым идеям · Астана, KZ", viewProjects: "Смотреть проекты", aboutButton: "Обо мне", resumeButton: "Резюме",
           aboutId: "01 / Обо мне", aboutHeading: "Думать. Создавать. Двигаться вперёд.", aboutCopy: "Я всегда стараюсь построить то, что приходит мне в голову. Этот mindset двигает меня вперёд как разработчика.",
-          background: "Мой путь", bio: "Я стараюсь <span>build</span> каждую идею, которая приходит мне в голову. Мне нравится создавать modern, useful и trust-worthy продукты, которыми люди действительно могут пользоваться.", aktau: "Актау", astana: "Астана", currentLevel: "Текущий уровень", hackMode: "Режим хакатона", hackCopy: "Я финалист трёх хакатонов и турниров. Умею быстро проверять идеи и вместе с командой доводить их до работающего результата.",
+          background: "Мой путь", bio: "Я родился в Актау. Сейчас изучаю Software Engineering в <span>AITU</span>, в Астане. Превращаю идеи в реальные продукты с помощью frontend, backend и AI.", bioDetail: "На хакатонах я вместе с командой быстро создавал MVP и выходил в финал. В каждом проекте стремлюсь сделать полезный, понятный и надёжный продукт.", aktau: "Актау", astana: "Астана", currentLevel: "Текущий уровень", hackMode: "Режим хакатона", hackCopy: "Я финалист трёх хакатонов и турниров. Умею быстро проверять идеи и вместе с командой доводить их до работающего результата.",
           projectsId: "02 / Избранные проекты", projectsHeading: "Созданные проекты.", projectsCopy: "Несколько работ из моих открытых репозиториев GitHub. Каждая из них — поиск, эксперименты и накопленный опыт.",
           project1: "AI-агент, который сравнивает организационные структуры и функции, показывает доказательства и экспортирует результат в HTML/CSV.", project2: "Полноценный MVP команды BluePulse, прогнозирующий дрейф нефти и плавающих объектов в Каспийском море.", project3: "Платформа для практики английского языка в реалистичных сценариях через ролевые диалоги с AI.", project4: "Трёхъязычная многопользовательская веб-игра в реальном времени с комнатами, командами, таймерами и QR-подключением.", project5: "Устанавливаемое PWA, которое хранит аудио на устройстве и воспроизводит его без интернета.", project6: "Командный Python-проект для учёта доходов, расходов, баланса, месячных отчётов и бюджетных лимитов.",
           repoHint: "GitHub / Полный архив", allRepos: "Посмотреть все открытые репозитории",
@@ -1634,7 +1699,7 @@
           heroKicker: "I am 18 and study at <b>Astana IT University</b>. Every day I grow across frontend, backend, and cross-platform product creation.",
           availability: "Open to new ideas · Astana, KZ", viewProjects: "View projects", aboutButton: "About me", resumeButton: "Resume",
           aboutId: "01 / About me", aboutHeading: "Think. Build. Move forward.", aboutCopy: "I always try to build what comes to mind. That mindset keeps pushing me forward as a developer.",
-          background: "My path", bio: "I try to <span>build</span> every idea that comes to mind. I enjoy creating modern, useful, and trustworthy products that people can genuinely use.", aktau: "Aktau", astana: "Astana", currentLevel: "Current level", hackMode: "Hackathon mode", hackCopy: "I am a finalist in three hackathons and tournaments. I know how to validate ideas quickly and turn them into working results with a team.",
+          background: "My path", bio: "Born in Aktau. Now studying Software Engineering at <span>AITU</span> in Astana. I turn ideas into real products through frontend, backend, and AI.", bioDetail: "At hackathons, I have built MVPs with my team and reached the finals. In every project, I aim to make something useful, clear, and trustworthy.", aktau: "Aktau", astana: "Astana", currentLevel: "Current level", hackMode: "Hackathon mode", hackCopy: "I am a finalist in three hackathons and tournaments. I know how to validate ideas quickly and turn them into working results with a team.",
           projectsId: "02 / Selected work", projectsHeading: "Projects I have built.", projectsCopy: "A selection from my public GitHub repositories. Each one represents exploration, experiments, and experience gained.",
           project1: "An AI agent that compares organizational structures and functions, shows evidence, and exports results to HTML/CSV.", project2: "BluePulse's complete MVP for forecasting the drift of oil and floating objects in the Caspian Sea.", project3: "A platform for practicing English in real-life scenarios through AI-powered roleplay conversations.", project4: "A trilingual real-time multiplayer web game with rooms, teams, timers, and QR joining.", project5: "An installable PWA that keeps audio on the device and plays it without an internet connection.", project6: "A team-built Python app for income, expenses, balances, monthly reports, and budget limits.",
           repoHint: "GitHub / Complete archive", allRepos: "Explore all public repositories",
@@ -1705,7 +1770,7 @@
           languageSwitch.classList.remove('is-changing');
           button.classList.remove('is-selecting');
           void languageTransition.offsetWidth;
-          languageTransition.classList.add('active');
+          if (!resumeModal.open) languageTransition.classList.add('active');
           languageSwitch.classList.add('is-changing');
           button.classList.add('is-selecting');
           if (resumeModal.open) {
@@ -1718,7 +1783,7 @@
             applyLanguage(nextLanguage);
             document.body.classList.remove('language-refresh');
             void document.body.offsetWidth;
-            document.body.classList.add('language-refresh');
+            if (!resumeModal.open) document.body.classList.add('language-refresh');
           }, 340);
           setTimeout(() => {
             languageTransition.classList.remove('active');
@@ -1738,6 +1803,8 @@
         resumeModal.classList.remove('is-closing');
         resumeModal.showModal();
         document.body.classList.add('resume-open');
+        syncPageMotion();
+        observeResume();
         requestAnimationFrame(() => resumeModal.querySelector('.resume-close').focus({ preventScroll: true }));
       };
       const closeResume = () => {
@@ -1758,7 +1825,46 @@
       resumeModal.addEventListener('click', (event) => {
         if (event.target === resumeModal) closeResume();
       });
-      resumeModal.addEventListener('close', () => document.body.classList.remove('resume-open'));
+      resumeModal.addEventListener('close', () => {
+        document.body.classList.remove('resume-open');
+        resumeObserver?.disconnect();
+        syncPageMotion();
+      });
+
+      const resumeShell = resumeModal.querySelector('.resume-shell');
+      const resumeProgress = resumeModal.querySelector('.resume-progress');
+      const resumeSurfaces = [...resumeModal.querySelectorAll('.resume-card, .resume-event, .resume-build')];
+      let resumeSeen = new WeakSet();
+      const resumeObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          const visible = entry.isIntersecting;
+          const element = entry.target;
+          element.classList.toggle('resume-active', visible && touchExperience);
+          if (visible && element.classList.contains('resume-card') && !resumeSeen.has(element)) {
+            resumeSeen.add(element);
+            element.classList.add('resume-entering');
+          }
+        }
+      }, { root: resumeShell, threshold: .04 }) : null;
+      resumeSurfaces.forEach((element) => element.addEventListener('animationend', (event) => {
+        if (event.animationName === 'resume-card-arrive') element.classList.remove('resume-entering');
+      }));
+      let resumeScrollRange = 1;
+      const refreshResumeGeometry = () => { resumeScrollRange = Math.max(resumeShell.scrollHeight - resumeShell.clientHeight, 1); };
+      const paintResumeProgress = () => {
+        paintStyle(resumeProgress, 'transform', `scaleX(${Math.min(1, resumeShell.scrollTop / resumeScrollRange).toFixed(4)})`);
+        return false;
+      };
+      const observeResume = () => {
+        resumeSeen = new WeakSet();
+        refreshResumeGeometry();
+        resumeSurfaces.forEach((element) => resumeObserver?.observe(element));
+        queueMotion(paintResumeProgress);
+      };
+      resumeShell.addEventListener('scroll', () => queueMotion(paintResumeProgress), { passive: true });
+      if ('ResizeObserver' in window) new ResizeObserver(() => {
+        if (resumeModal.open) { refreshResumeGeometry(); queueMotion(paintResumeProgress); }
+      }).observe(resumeContent);
 
       const boot = document.getElementById('boot');
       setTimeout(() => {
@@ -1768,16 +1874,23 @@
 
       const heroSection = document.querySelector('.hero');
       const heroCopy = document.querySelector('.hero-copy');
+      const scrollProgressBar = document.querySelector('.scroll-progress');
       let heroScrollProgress = 0;
       let scrollFrame = 0;
+      let pageScrollRange = 1, heroRange = 1;
+      const refreshPageGeometry = () => {
+        pageScrollRange = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
+        heroRange = Math.max(heroSection.offsetHeight * .82, 1);
+      };
+      refreshPageGeometry();
+      if ('ResizeObserver' in window) new ResizeObserver(refreshPageGeometry).observe(document.querySelector('main'));
+      addEventListener('resize', refreshPageGeometry, { passive: true });
       const updateScrollProgress = () => {
-        const max = document.documentElement.scrollHeight - innerHeight;
-        const progress = max > 0 ? (scrollY / max) * 100 : 0;
-        document.documentElement.style.setProperty('--scroll', `${Math.min(100, progress)}%`);
-        const heroRange = Math.max(heroSection.offsetHeight * .82, 1);
+        const progress = Math.min(1, scrollY / pageScrollRange);
+        paintStyle(scrollProgressBar, 'transform', `scaleX(${progress.toFixed(4)})`);
         heroScrollProgress = Math.max(0, Math.min(1, scrollY / heroRange));
-        heroCopy.style.setProperty('--hero-shift', `${(-heroScrollProgress * 46).toFixed(1)}px`);
-        heroCopy.style.setProperty('--hero-opacity', `${(1 - heroScrollProgress * .58).toFixed(3)}`);
+        paintStyle(heroCopy, 'transform', `translate3d(0, ${(-heroScrollProgress * 46).toFixed(1)}px, 0)`);
+        paintStyle(heroCopy, 'opacity', (1 - heroScrollProgress * .58).toFixed(3));
         scrollFrame = 0;
       };
       addEventListener('scroll', () => {
@@ -1787,9 +1900,17 @@
 
       const dot = document.querySelector('.cursor-dot');
       const ring = document.querySelector('.cursor-ring');
+      const ambientGlow = document.querySelector('.ambient-glow');
       let pointerX = innerWidth / 2, pointerY = innerHeight / 2;
       let ringX = pointerX, ringY = pointerY;
-      let lastAmbientPaint = 0;
+      const followCursor = () => {
+        ringX += (pointerX - ringX) * .14;
+        ringY += (pointerY - ringY) * .14;
+        paintStyle(dot, 'transform', `translate3d(${pointerX}px, ${pointerY}px, 0) translate(-50%, -50%)`);
+        paintStyle(ring, 'transform', `translate3d(${ringX.toFixed(2)}px, ${ringY.toFixed(2)}px, 0) translate(-50%, -50%)`);
+        if (!resumeModal.open) paintStyle(ambientGlow, 'transform', `translate3d(${pointerX - 600}px, ${pointerY - 600}px, 0)`);
+        return Math.abs(pointerX - ringX) > .1 || Math.abs(pointerY - ringY) > .1;
+      };
 
       if (!reduced) {
         addEventListener('pointermove', (event) => {
@@ -1798,24 +1919,8 @@
           pointerY = event.clientY;
           dot.style.opacity = '1';
           ring.style.opacity = '1';
+          queueMotion(followCursor);
         }, { passive: true });
-        const followCursor = (time) => {
-          if (document.hidden) {
-            setTimeout(() => requestAnimationFrame(followCursor), 220);
-            return;
-          }
-          ringX += (pointerX - ringX) * .14;
-          ringY += (pointerY - ringY) * .14;
-          dot.style.transform = `translate(${pointerX}px, ${pointerY}px) translate(-50%, -50%)`;
-          ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
-          if (time - lastAmbientPaint > 34) {
-            document.documentElement.style.setProperty('--mx', `${pointerX}px`);
-            document.documentElement.style.setProperty('--my', `${pointerY}px`);
-            lastAmbientPaint = time;
-          }
-          requestAnimationFrame(followCursor);
-        };
-        requestAnimationFrame(followCursor);
         document.querySelectorAll('a, .skills-stage').forEach((target) => {
           target.addEventListener('mouseenter', () => ring.classList.add('active'));
           target.addEventListener('mouseleave', () => {
@@ -1921,39 +2026,34 @@
       let lastFrame = performance.now();
       let resumeAt = 0;
       let skillsVisible = true;
+      let skillSpacing = 132;
+      const refreshSkillGeometry = () => { skillSpacing = Math.min(132, Math.max(98, stage.clientWidth / 7)); };
+      refreshSkillGeometry();
+      if ('ResizeObserver' in window) new ResizeObserver(refreshSkillGeometry).observe(stage);
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(([entry]) => { skillsVisible = entry.isIntersecting; }, { rootMargin: '180px 0px' }).observe(stage);
+        new IntersectionObserver(([entry]) => { skillsVisible = entry.isIntersecting; syncPageMotion(); }).observe(stage);
       }
 
       function positionSkills(now) {
-        if (!skillsVisible || document.hidden) {
-          lastFrame = now;
-          setTimeout(() => requestAnimationFrame(positionSkills), 180);
-          return;
-        }
+        if (!skillsVisible || document.hidden || resumeModal.open) { lastFrame = now; return false; }
         const elapsed = now - lastFrame;
-        if (elapsed < 24) {
-          requestAnimationFrame(positionSkills);
-          return;
-        }
+        if (elapsed < 15) return true;
         const dt = Math.min(40, elapsed);
         lastFrame = now;
         if (!dragging && now > resumeAt) phase += dt * (reduced ? .00016 : .00042);
         const count = skills.length;
-        const spacing = Math.min(132, Math.max(98, stage.clientWidth / 7));
         skills.forEach((skill, index) => {
           let relative = ((index + phase + count / 2) % count + count) % count - count / 2;
           const distance = Math.abs(relative);
           const scale = 1.16 - Math.min(distance, 4) * .105;
           const y = Math.min(distance, 4) * 4;
           const rotateY = Math.max(-28, Math.min(28, relative * -7));
-          skill.style.transform = `translate(-50%, -50%) translate3d(${relative * spacing}px, ${y}px, ${110 - distance * 30}px) rotateY(${rotateY}deg) scale(${scale})`;
-          skill.style.opacity = `${Math.max(.16, 1 - distance * .115)}`;
-          skill.style.zIndex = `${100 - Math.round(distance * 10)}`;
+          paintStyle(skill, 'transform', `translate(-50%, -50%) translate3d(${(relative * skillSpacing).toFixed(2)}px, ${y.toFixed(2)}px, ${(110 - distance * 30).toFixed(2)}px) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(4)})`);
+          paintStyle(skill, 'opacity', Math.max(.16, 1 - distance * .115).toFixed(3));
+          paintStyle(skill, 'zIndex', `${100 - Math.round(distance * 10)}`);
         });
-        requestAnimationFrame(positionSkills);
+        return true;
       }
-      requestAnimationFrame(positionSkills);
 
       stage.addEventListener('pointerdown', (event) => {
         dragging = true;
@@ -1976,6 +2076,15 @@
       stage.addEventListener('pointercancel', finishDrag);
 
       const terminalScene = document.querySelector('.terminal-scene');
+      const terminalGlare = terminalScene.querySelector('.terminal-glare');
+      let terminalWidth = 430, terminalHeight = 300;
+      const refreshTerminalGeometry = () => {
+        const terminal = terminalScene.querySelector('.terminal');
+        terminalWidth = terminal.clientWidth;
+        terminalHeight = terminal.clientHeight;
+      };
+      refreshTerminalGeometry();
+      if ('ResizeObserver' in window) new ResizeObserver(refreshTerminalGeometry).observe(terminalScene);
       let targetProfileX = 5;
       let targetProfileY = -8;
       let targetProfileZ = 0;
@@ -1992,7 +2101,7 @@
       let currentGlareY = 35;
       let lastProfilePointerX = innerWidth / 2;
       const pointProfile = (event) => {
-        if (event.pointerType === 'touch') return;
+        if (event.pointerType === 'touch' || !heroMotionVisible || resumeModal.open) return;
         const horizontal = Math.max(-.5, Math.min(.5, event.clientX / Math.max(innerWidth, 1) - .5));
         const vertical = Math.max(-.5, Math.min(.5, event.clientY / Math.max(innerHeight, 1) - .5));
         targetProfileX = vertical * -24;
@@ -2005,13 +2114,10 @@
       addEventListener('PointerEvent' in window ? 'pointermove' : 'mousemove', pointProfile, { passive: true });
       let heroMotionVisible = true;
       if ('IntersectionObserver' in window) {
-        new IntersectionObserver(([entry]) => { heroMotionVisible = entry.isIntersecting; }, { rootMargin: '120px 0px' }).observe(heroSection);
+        new IntersectionObserver(([entry]) => { heroMotionVisible = entry.isIntersecting; syncPageMotion(); }).observe(document.querySelector('.hero-side'));
       }
       const trackProfile = (time) => {
-        if ((!heroMotionVisible && heroScrollProgress > .995) || document.hidden) {
-          setTimeout(() => requestAnimationFrame(trackProfile), 180);
-          return;
-        }
+        if (!heroMotionVisible || document.hidden || resumeModal.open) return false;
         const scrollLeanTarget = heroScrollProgress * 27;
         const scrollYTarget = heroScrollProgress * 82;
         const scrollScaleTarget = 1 - heroScrollProgress * .14;
@@ -2026,57 +2132,76 @@
         currentGlareX += (targetGlareX - currentGlareX) * .09;
         currentGlareY += (targetGlareY - currentGlareY) * .09;
         const idleFloat = Math.sin(time * .00115) * .7 * (1 - heroScrollProgress);
-        terminalScene.style.setProperty('--rx', `${(currentProfileX + idleFloat).toFixed(2)}deg`);
-        terminalScene.style.setProperty('--ry', `${(currentProfileY * (1 - heroScrollProgress * .42)).toFixed(2)}deg`);
-        terminalScene.style.setProperty('--rz', `${currentProfileZ.toFixed(2)}deg`);
-        terminalScene.style.setProperty('--scroll-rx', `${currentScrollLean.toFixed(2)}deg`);
-        terminalScene.style.setProperty('--scroll-y', `${currentScrollY.toFixed(1)}px`);
-        terminalScene.style.setProperty('--scroll-scale', currentScrollScale.toFixed(4));
-        terminalScene.style.setProperty('--profile-opacity', currentProfileOpacity.toFixed(3));
-        terminalScene.style.setProperty('--glare-x', `${currentGlareX.toFixed(1)}%`);
-        terminalScene.style.setProperty('--glare-y', `${currentGlareY.toFixed(1)}%`);
+        paintStyle(terminalScene, 'transform', `translate3d(0, ${currentScrollY.toFixed(1)}px, 0) rotateX(${(currentProfileX + idleFloat + currentScrollLean).toFixed(2)}deg) rotateY(${(currentProfileY * (1 - heroScrollProgress * .42)).toFixed(2)}deg) rotateZ(${currentProfileZ.toFixed(2)}deg) scale(${currentScrollScale.toFixed(4)})`);
+        paintStyle(terminalScene, 'opacity', currentProfileOpacity.toFixed(3));
+        paintStyle(terminalGlare, 'transform', `translate3d(${(currentGlareX * terminalWidth / 100 - 190).toFixed(1)}px, ${(currentGlareY * terminalHeight / 100 - 190).toFixed(1)}px, 0)`);
         targetProfileZ *= .9;
-        requestAnimationFrame(trackProfile);
+        return true;
       };
-      trackProfile();
+      syncPageMotion = () => {
+        const active = !document.hidden && !resumeModal.open;
+        if (active && skillsVisible) { lastFrame = performance.now(); queueMotion(positionSkills); } else cancelMotion(positionSkills);
+        if (active && heroMotionVisible) queueMotion(trackProfile); else cancelMotion(trackProfile);
+      };
+      syncPageMotion();
+
+      // Sample pointer input once per frame and reuse geometry for the interaction.
+      const bindPointerEffect = (element, paint) => {
+        let bounds = null, pointer = null;
+        const draw = () => {
+          if (!pointer || !bounds) return false;
+          const x = pointer.x - bounds.left - bounds.width / 2;
+          const y = pointer.y - bounds.top - bounds.height / 2;
+          paint(x / bounds.width, y / bounds.height, x, y);
+          return false;
+        };
+        element.addEventListener('pointerenter', (event) => {
+          if (event.pointerType !== 'touch') bounds = element.getBoundingClientRect();
+        });
+        element.addEventListener('pointermove', (event) => {
+          if (event.pointerType === 'touch') return;
+          if (!bounds) bounds = element.getBoundingClientRect();
+          pointer = { x: event.clientX, y: event.clientY };
+          queueMotion(draw);
+        }, { passive: true });
+        element.addEventListener('pointerleave', () => {
+          pointer = bounds = null;
+          cancelMotion(draw);
+          paintStyle(element, 'transform', '');
+        });
+      };
 
       if (!reduced) {
         document.querySelectorAll('.magnetic').forEach((element) => {
-          element.addEventListener('pointermove', (event) => {
-            if (event.pointerType === 'touch') return;
-            const rect = element.getBoundingClientRect();
-            const x = event.clientX - rect.left - rect.width / 2;
-            const y = event.clientY - rect.top - rect.height / 2;
+          bindPointerEffect(element, (relativeX, relativeY, x, y) => {
             const lift = element.classList.contains('repo-cta') ? -5 : 0;
-            element.style.transform = `translate(${x * .1}px, ${y * .14 + lift}px) scale(1.025)`;
+            paintStyle(element, 'transform', `translate3d(${(x * .1).toFixed(2)}px, ${(y * .14 + lift).toFixed(2)}px, 0) scale(1.025)`);
           });
-          element.addEventListener('pointerleave', () => { element.style.transform = ''; });
         });
 
         document.querySelectorAll('.about-grid .card').forEach((card) => {
-          card.addEventListener('pointermove', (event) => {
-            if (event.pointerType === 'touch') return;
-            const rect = card.getBoundingClientRect();
-            const x = (event.clientX - rect.left) / rect.width - .5;
-            const y = (event.clientY - rect.top) / rect.height - .5;
+          bindPointerEffect(card, (x, y) => {
             card.style.setProperty('--card-x', `${(x + .5) * 100}%`);
             card.style.setProperty('--card-y', `${(y + .5) * 100}%`);
-            card.style.transform = `perspective(900px) rotateX(${y * -7}deg) rotateY(${x * 9}deg) translateY(-7px) scale(1.012)`;
+            paintStyle(card, 'transform', `perspective(900px) rotateX(${(y * -7).toFixed(2)}deg) rotateY(${(x * 9).toFixed(2)}deg) translateY(-7px) scale(1.012)`);
           });
-          card.addEventListener('pointerleave', () => { card.style.transform = ''; });
         });
 
         document.querySelectorAll('.step').forEach((step) => {
-          step.addEventListener('pointermove', (event) => {
-            if (event.pointerType === 'touch') return;
-            const rect = step.getBoundingClientRect();
-            const x = (event.clientX - rect.left) / rect.width - .5;
-            const y = (event.clientY - rect.top) / rect.height - .5;
+          bindPointerEffect(step, (x, y) => {
             step.style.setProperty('--step-x', `${(x + .5) * 100}%`);
             step.style.setProperty('--step-y', `${(y + .5) * 100}%`);
-            step.style.transform = `perspective(900px) rotateX(${y * -8}deg) rotateY(${x * 10}deg) translateY(-8px) scale(1.018)`;
+            paintStyle(step, 'transform', `perspective(900px) rotateX(${(y * -8).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) translateY(-8px) scale(1.018)`);
           });
-          step.addEventListener('pointerleave', () => { step.style.transform = ''; });
+        });
+        resumeSurfaces.forEach((surface) => {
+          bindPointerEffect(surface, (x, y) => {
+            if (surface.classList.contains('resume-card')) {
+              surface.style.setProperty('--resume-x', `${((x + .5) * 100).toFixed(1)}%`);
+              surface.style.setProperty('--resume-y', `${((y + .5) * 100).toFixed(1)}%`);
+            }
+            paintStyle(surface, 'transform', `perspective(1100px) translateY(-5px) rotateX(${(-y * 3).toFixed(2)}deg) rotateY(${(x * 4).toFixed(2)}deg)`);
+          });
         });
       }
 
@@ -2090,7 +2215,7 @@
         ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
       };
 
-      document.querySelectorAll('.button, .project, .contact-link, .nav-cta, .repo-cta, .lang-btn').forEach((control) => {
+      document.querySelectorAll('.button, .project, .contact-link, .nav-cta, .repo-cta, .lang-btn, .resume-lang-btn, .resume-action, .resume-build').forEach((control) => {
         control.addEventListener('click', (event) => addRipple(control, event));
       });
 
@@ -2117,16 +2242,11 @@
 
       if (!reduced) {
         document.querySelectorAll('.tilt').forEach((card) => {
-          card.addEventListener('pointermove', (event) => {
-            if (event.pointerType === 'touch') return;
-            const rect = card.getBoundingClientRect();
-            const x = (event.clientX - rect.left) / rect.width - .5;
-            const y = (event.clientY - rect.top) / rect.height - .5;
+          bindPointerEffect(card, (x, y) => {
             card.style.setProperty('--px', `${(x + .5) * 100}%`);
             card.style.setProperty('--py', `${(y + .5) * 100}%`);
-            card.style.transform = `perspective(800px) rotateX(${y * -5}deg) rotateY(${x * 7}deg) translateY(-4px)`;
+            paintStyle(card, 'transform', `perspective(800px) rotateX(${(y * -5).toFixed(2)}deg) rotateY(${(x * 7).toFixed(2)}deg) translateY(-4px)`);
           });
-          card.addEventListener('pointerleave', () => { card.style.transform = ''; });
         });
       }
 
